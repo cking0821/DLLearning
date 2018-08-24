@@ -2,7 +2,7 @@
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-
+import numpy as np
 
 
 mnist=input_data.read_data_sets('../../../data/MNIST_data',one_hot=True)
@@ -39,9 +39,10 @@ def conv2d(x,W):
 pooling 有两种，一种是最大值池化，一种是平均值池化，
 本例采用的是最大值池化tf.max_pool()。
 池化的核函数大小为2x2，因此ksize=[1,2,2,1]，步长为2，因此strides=[1,2,2,1]:
+tf.layers.max_pooling2d
 '''
 def max_pool_2x2(x):
-	return tf.nn.max_pool(x,ksize=[1,2,2,1],strides=[1,2,2,1])
+	return tf.nn.max_pool(x,ksize=[1,2,2,1],strides=[1,2,2,1],padding='SAME')
 
 
 # 图片处理
@@ -51,7 +52,7 @@ xs=tf.placeholder(tf.float32,[None,784])
 ys=tf.placeholder(tf.float32,[None,10])
 
 # 定义了dropout的placeholder，它是解决过拟合的有效手段
-keep_prob=tf.placeholder(tf.float32)
+keep_drop=tf.placeholder(tf.float32)
 
 '''
 接着呢，我们需要处理我们的xs，把xs的形状变成[-1,28,28,1]，
@@ -85,7 +86,7 @@ b_conv1=bias_variable([32])
 h_conv1=tf.nn.relu(conv2d(x_image,W_conv1)+b_conv1)
 
 # 最后我们再进行pooling的处理就ok啦，经过pooling的处理，输出大小就变为了14x14x32
-h_pool=max_pool_2x2(h_conv1)
+h_pool1=max_pool_2x2(h_conv1)
 
 
 # 接着呢，同样的形式我们定义第二层卷积，
@@ -116,7 +117,7 @@ b_fc1=bias_variable([1024])
 h_fc1=tf.nn.relu(tf.matmul(h_pool2_flat,W_fc1)+b_fc1)
 
 # 如果我们考虑过拟合问题，可以加一个dropout的处理
-h_fc1_drop=tf.nn.dropout(h_fc1,keep_drop)
+h_fc1_drop1=tf.nn.dropout(h_fc1,keep_drop)
 
 # 接下来我们就可以进行最后一层的构建了，好激动啊, 输入是1024，最后的输出是10个 (因为mnist数据集就是[0-9]十个类)，
 # prediction就是我们最后的预测值
@@ -124,7 +125,7 @@ W_fc2=weight_variable([1024,10])
 b_fc2=bias_variable([10])
 
 # 然后呢我们用softmax分类器（多分类，输出是各个类的概率）,对我们的输出进行分类
-prediction=tf.nn.softmax(tf.matmul(h_fc1_dropt,W_fc2),b_fc2)
+prediction=tf.nn.softmax(tf.matmul(h_fc1_drop1,W_fc2) + b_fc2)
 
 ##########################################
 #                选优化方法                #
@@ -186,6 +187,7 @@ Save to path:  my_net/save_net.ckpt
 #########################################################
 # 提取时, 先建立零时的W 和 b容器. 找到文件目录, 并用saver.restore()我们放在这个目录的变量.
 # 先建立 W, b 的容器
+tf.reset_default_graph()
 W = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights")
 b = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases")
 
