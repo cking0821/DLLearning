@@ -7,8 +7,6 @@ import numpy as np
 
 mnist=input_data.read_data_sets('../../../data/MNIST_data',one_hot=True)
 
-print(mnist)
-print ("***")
 # 定义 Weight 变量，输入 shape , 返回变量的参数。
 # 使用tf.truncted_normal产生随机变量来进行初始化
 def weight_variable(shape):
@@ -187,7 +185,7 @@ Save to path:  my_net/save_net.ckpt
 #########################################################
 # 提取时, 先建立零时的W 和 b容器. 找到文件目录, 并用saver.restore()我们放在这个目录的变量.
 # 先建立 W, b 的容器
-tf.reset_default_graph()
+tf.reset_default_graph() #加上。 使得每次恢复时模型会转化成默认的图。。因为再次读取模型时，权重名称已经发生变化，所以就会报错误
 W = tf.Variable(np.arange(6).reshape((2, 3)), dtype=tf.float32, name="weights")
 b = tf.Variable(np.arange(3).reshape((1, 3)), dtype=tf.float32, name="biases")
 
